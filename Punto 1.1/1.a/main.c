@@ -10,6 +10,19 @@
 #define	ERROR_FCNTL 2
 #define	ERROR_FORK 3
 
+// Función para generar basura random.
+char generarBasura(){
+	char basura;
+	int r = rand() % 4;
+	switch(r){
+		case 0: { basura = 'P'; break; }
+		case 1: { basura = 'C'; break; }
+		case 2: { basura = 'A'; break; }
+		case 3: { basura = 'V'; break; }
+	}
+	return basura;
+}
+
 int main(){
 
   /*
@@ -39,7 +52,7 @@ int main(){
   if (fcntl(pipe_aluminio[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
   if (fcntl(pipe_plastico[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
   
-  
+  // Código de los recolectores
 	for(int i = 0; i < 3; i++){
 		pid = fork();
 		if(pid < 0) exit(ERROR_FORK);
@@ -55,20 +68,12 @@ int main(){
 		  close(pipe_plastico[1]);
 		  close(pipe_aluminio[0]);
 		  close(pipe_aluminio[1]);
-		  
-			while(1){
-			  int r = rand() % 4;
-			  char basura;
-			  switch(r){
-				case 0: { basura = 'P'; break; }
-				case 1: { basura = 'C'; break; }
-				case 2: { basura = 'A'; break; }
-				case 3: { basura = 'V'; break; }
-			  } // Se mete una basura random al pipe
-			 // printf("Recolectar %i mete: %c\n", i, basura);
-			  write(pipe_recicladorTOclasificador[1], &basura, sizeof(char));
-			  sleep(5); // Producen cada 5 segundo, para no sobrecargar la shell
-				}
+		  while(1){
+			char basura = generarBasura(); // Se mete una basura random al pipe
+			// printf("Recolectar %i mete: %c\n", i, basura);
+			write(pipe_recicladorTOclasificador[1], &basura, sizeof(char));
+			sleep(5); // Producen cada 5 segundo, para no sobrecargar la shell
+		  }
 		  exit(0);
 		} else continue;
 	}
