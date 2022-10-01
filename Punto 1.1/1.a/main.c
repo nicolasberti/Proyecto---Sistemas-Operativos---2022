@@ -82,7 +82,7 @@ int main(){
     pid = fork();
 		if(pid < 0) exit(ERROR_FORK);
 		else if(pid == 0) { // Código del reciclador
-			while(1){ // Para limitar, despues lo borramos y ponemos while(1)
+			while(1){ 
 				close(pipe_recicladorTOclasificador[1]);
 				close(pipe_vidrio[0]);
 				close(pipe_carton[0]);
@@ -142,7 +142,7 @@ int main(){
 							else printf("Reciclo lo de otro - ");
 							printf("Se recicló una unidad de vidrio.\n");
 							reciclarOtro = 0; j = i;
-						} else reciclarOtro = 1;  break; }
+						} else reciclarOtro = 1; printf("No tengo para reciclar. Que hago?"); break; }
 					case 1: {
 						nread = read(pipe_plastico[0], &basura, sizeof(char));
 						if(nread == 1) {
@@ -151,7 +151,7 @@ int main(){
 							else printf("Reciclo lo de otro - ");
 							printf("Se recicló una unidad de plastico.\n");
 							reciclarOtro = 0; j = i;
-						} else reciclarOtro = 1;  break; }
+						} else reciclarOtro = 1; printf("No tengo para reciclar. Que hago?"); break; }
 					case 2: {
 						nread = read(pipe_aluminio[0], &basura, sizeof(char));
 						if(nread == 1) {
@@ -160,7 +160,7 @@ int main(){
 							else printf("Reciclo lo de otro - ");
 							printf("Se recicló una unidad de aluminio.\n");
 							reciclarOtro = 0; j = i;
-						} else reciclarOtro = 1;  break; }
+						} else reciclarOtro = 1; printf("No tengo para reciclar. Que hago?"); break; }
 					case 3: {
 						nread = read(pipe_carton[0], &basura, sizeof(char));
 						if(nread == 1) {
@@ -169,12 +169,12 @@ int main(){
 							else printf("Reciclo lo de otro - ");
 							printf("Se recicló una unidad de carton.\n");
 							reciclarOtro = 0; j = i;
-						} else reciclarOtro = 1; break; }
+						} else reciclarOtro = 1; printf("No tengo para reciclar. Que hago?"); break; }
 				}
 				if(reciclarOtro == 1) {
 					int r = rand() % 2;
 					int h;
-					if(r == 0) { // Ayuda, si no, se va a tomar mate
+					if(r == 0) { // El reciclar decide que hacer, si ayudar o irse a tomar mate.
 						do {
 							h = rand() % 4;
 						} while ( j != h );
