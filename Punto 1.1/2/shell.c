@@ -14,12 +14,13 @@
 #define ERROR_FORK              			2
 
 
-#define CANTIDAD_COMANDOS					6
+
 /* Errores pero para imprimir por consola */
 #define ERROR_LIMITE 				     	printf("~$ Limite de comandos");
 #define	ERROR_DECOMANDO				     	printf("~$ El comando no pudo ser ejecutado [revise los parametros]");
 #define ERROR_INVALIDO 				     	printf("~$ Comando invalido");
 
+#define CANTIDAD_COMANDOS					6
 
 #define	PARAMETROS_MAXIMOS			     	2
 #define	TOTAL_INDICES				        PARAMETROS_MAXIMOS+1
