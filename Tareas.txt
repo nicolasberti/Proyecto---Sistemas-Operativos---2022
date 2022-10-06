@@ -1,0 +1,5 @@
+1.1.
+	1.b Palo -> Cola de mensajes
+1.2.
+	1.b Palo -> Sincronización con pipes (hacerlo igual que en el labo 3)
+	2 Hacerlo el miercoles
