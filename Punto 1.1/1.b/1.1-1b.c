@@ -7,10 +7,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-
 #define	ERROR_FORK 3
-#define MAX 2
 
+#define KEY_clasificador 	((key_t) (1230))
+
+#define KEY_vidrio 			((key_t) (1231))
+#define KEY_aluminio	 	((key_t) (1232))
+#define KEY_plastico 		((key_t) (1233))
+#define KEY_carton	 		((key_t) (1234))
+
+#define SEGSIZE sizeof(struct message_buffer) /* longitud del segmento */
 
 struct message_buffer{
     long msg_type;
@@ -22,18 +28,15 @@ void writer(int msg_id, char message){
     struct message_buffer m;
     m.msg_type= 1;
     m.msg = message;
-    if(msgsnd(msg_id, &m, strlen(&message), 0) == -1)
+    if(msgsnd(msg_id, &m, ( sizeof(struct message_buffer) - sizeof(long) ), 0) == -1)
         printf("Error al enviar mensaje.");
 }
 
 //Recibe el id de una cola de mensajes, lee el mensaje que esta adentro y lo devuelve.
 char reader(int msg_id){
-
     struct message_buffer m;
-
-    if(msgrcv(msg_id, &m, MAX, 0, 0) == -1)
+    if(msgrcv(msg_id, &m, ( sizeof(struct message_buffer) - sizeof(long) ), 0) == -1)
         printf("Error al recibir mensaje");
-
     return (m.msg);
 }
 
@@ -62,7 +65,15 @@ int main(){
   */
 
 	pid_t pid;
-
+	
+	// Creación de las colas
+	int qid_clas = msgget(KEY_clasificador, SEGSIZE, IPC_CREAT|0666);
+	
+	int qid_vidrio = msgget(KEY_vidrio, SEGSIZE, IPC_CREAT|0666);
+	int qid_aluminio = msgget(KEY_aluminio, SEGSIZE, IPC_CREAT|0666);
+	int qid_carton = msgget(KEY_carton, SEGSIZE, IPC_CREAT|0666);
+	int qid_plastico = msgget(KEY_plastico, SEGSIZE, IPC_CREAT|0666);
+	
   // Código de los recolectores
 	for(int i = 0; i < 3; i++){
 		pid = fork();
@@ -75,10 +86,7 @@ int main(){
 			printf("\nRecolectar %i mete: %c\n", i, basura);
 
 			//Creacion de cola de mensajes de recolectores.
-			int msg_id;
-            key_t key;
-            key = ftok("/tmp", 'a');
-            msg_id = msgget(key, IPC_CREAT | 0666);
+			int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
             if(msg_id == -1)
                 printf("Error en creacion de cola");
             //Se envia el mensaje,
@@ -97,10 +105,7 @@ int main(){
 			while(1){
                 //Se obtiene la cola de mensajes de los recolectores.
 				char basura;
-                int msg_id;
-                key_t key;
-                key = ftok("/tmp", 'a');
-                msg_id = msgget(key, IPC_CREAT | 0666);
+                int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
                 if(msg_id == -1)
                     printf("Error en cola");
 
@@ -110,34 +115,22 @@ int main(){
 				printf("\n[Contador %i] Clasificador recibe %c\n", i, basura);
 
                 //Cola de mensajes para vidrio
-                key_t key_vidrio;
-                key_vidrio = ftok("/tmp", 'b');
-                int msg_id_vidrio;
-                msg_id_vidrio = msgget(key_vidrio, IPC_CREAT | 0666);
+				int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
                 if(msg_id_vidrio == -1)
                     printf("Error en cola");
 
                 //Cola de mensajes para plastico
-                key_t key_plastico;
-                key_plastico = ftok("/tmp", 'c');
-                int msg_id_plastico;
-                msg_id_plastico = msgget(key_plastico, IPC_CREAT | 0666);
+                int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
                 if(msg_id_plastico == -1)
                     printf("Error en cola");
 
                 //Cola de mensajes para aluminio
-                key_t key_aluminio;
-                key_aluminio = ftok("/tmp", 'd');
-                int msg_id_aluminio;
-                msg_id_aluminio = msgget(key_aluminio, IPC_CREAT | 0666);
+                int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
                 if(msg_id_aluminio == -1)
                     printf("Error en cola");
 
                 //Cola de mensajes para carton
-                key_t key_carton;
-                key_carton = ftok("/tmp", 'e');
-                int msg_id_carton;
-                msg_id_carton = msgget(key_carton, IPC_CREAT | 0666);
+                int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
                 if(msg_id_carton == -1)
                     printf("Error en cola");
 
@@ -173,10 +166,7 @@ int main(){
 				switch(j){
 					case 0: {
                         //Se obtiene la cola de mensajes para vidrio.
-                        key_t key_vidrio;
-                        key_vidrio = ftok("/tmp", 'b');
-                        int msg_id_vidrio;
-                        msg_id_vidrio = msgget(key_vidrio, IPC_CREAT | 0666);
+                        int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
                         if(msg_id_vidrio == -1)
                             printf("Error en cola");
                         //Se recibe el mensaje.
@@ -189,10 +179,7 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 1: {
                         //Se obtiene la cola de mensajes para plastico.
-                        key_t key_plastico;
-                        key_plastico = ftok("/tmp", 'c');
-                        int msg_id_plastico;
-                        msg_id_plastico = msgget(key_plastico, IPC_CREAT | 0666);
+                        int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
                         if(msg_id_plastico == -1)
                             printf("Error en cola");
                         //Se recibe el mensaje.
@@ -205,10 +192,7 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 2: {
                         //Se obtiene la cola de mensajes para aluminio.
-                        key_t key_aluminio;
-                        key_aluminio = ftok("/tmp", 'd');
-                        int msg_id_aluminio;
-                        msg_id_aluminio = msgget(key_aluminio, IPC_CREAT | 0666);
+                        int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
                         if(msg_id_aluminio == -1)
                                 printf("Error en cola");
                         //Se recibe el mensaje.
@@ -221,10 +205,7 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 3: {
                         //Se obtiene la cola de mensajes para carton.
-                        key_t key_carton;
-                        key_carton = ftok("/tmp", 'e');
-                        int msg_id_carton;
-                        msg_id_carton = msgget(key_carton, IPC_CREAT | 0666);
+                        int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
                         if(msg_id_carton == -1)
                             printf("Error en cola");
                         //Se recibe el mensaje.
