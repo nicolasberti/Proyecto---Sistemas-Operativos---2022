@@ -89,7 +89,7 @@ int main(){
 
 			//Creacion de cola de mensajes de recolectores.
 			//int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
-			int msg_id = msgget(KEY_clasificador, IPC_CREAT | 0666);
+			int msg_id = msgget(KEY_clasificador, 0666);
             if(msg_id == -1)
                 printf("\nError en creacion de cola de recolectores\n");
             //Se envia el mensaje,
@@ -109,7 +109,7 @@ int main(){
                 //Se obtiene la cola de mensajes de los recolectores.
 				char basura;
                 //int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
-                int msg_id = msgget(KEY_clasificador, IPC_CREAT | 0666);
+                int msg_id = msgget(KEY_clasificador, 0666);
                 if(msg_id == -1)
                     printf("\nError en cola para recibir de recolectores\n");
 
@@ -120,26 +120,26 @@ int main(){
 
                 //Cola de mensajes para vidrio
 				//int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
-				int msg_id_vidrio = msgget(KEY_vidrio, IPC_CREAT | 0666);
+				int msg_id_vidrio = msgget(KEY_vidrio, 0666);
                 if(msg_id_vidrio == -1)
                     printf("\nError en cola de vidrio\n");
 
                 //Cola de mensajes para plastico
                 //int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
-                int msg_id_plastico = msgget(KEY_plastico,IPC_CREAT | 0666 );
+                int msg_id_plastico = msgget(KEY_plastico,0666 );
 
                 if(msg_id_plastico == -1)
                     printf("\nError en cola de plastico\n");
 
                 //Cola de mensajes para aluminio
                 //int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
-                int msg_id_aluminio = msgget(KEY_aluminio, IPC_CREAT | 0666 );
+                int msg_id_aluminio = msgget(KEY_aluminio, 0666 );
                 if(msg_id_aluminio == -1)
                     printf("\nError en cola de aluminio\n");
 
                 //Cola de mensajes para carton
                 //int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
-                int msg_id_carton = msgget(KEY_carton, IPC_CREAT | 0666);
+                int msg_id_carton = msgget(KEY_carton, 0666);
                 if(msg_id_carton == -1)
                     printf("\nError en cola de carton\n");
 
@@ -176,7 +176,7 @@ int main(){
 					case 0: {
                         //Se obtiene la cola de mensajes para vidrio.
                         //int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
-                        int msg_id_vidrio = msgget(KEY_vidrio, IPC_CREAT | 0666);
+                        int msg_id_vidrio = msgget(KEY_vidrio, 0666);
                         if(msg_id_vidrio == -1)
                             printf("\nError en cola para recibir vidrio\n");
                         //Se recibe el mensaje.
@@ -190,7 +190,7 @@ int main(){
 					case 1: {
                         //Se obtiene la cola de mensajes para plastico.
                         //int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
-                        int msg_id_plastico = msgget(KEY_plastico,IPC_CREAT | 0666 );
+                        int msg_id_plastico = msgget(KEY_plastico,0666 );
                         if(msg_id_plastico == -1)
                             printf("\nError en cola para recibir plastico\n");
                         //Se recibe el mensaje.
@@ -204,7 +204,7 @@ int main(){
 					case 2: {
                         //Se obtiene la cola de mensajes para aluminio.
                         //int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
-                        int msg_id_aluminio = msgget(KEY_aluminio, IPC_CREAT | 0666 );
+                        int msg_id_aluminio = msgget(KEY_aluminio, 0666 );
                         if(msg_id_aluminio == -1)
                                 printf("\nError en cola para recibir aluminio\n");
                         //Se recibe el mensaje.
@@ -218,7 +218,7 @@ int main(){
 					case 3: {
                         //Se obtiene la cola de mensajes para carton.
                         //int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
-                        int msg_id_carton = msgget(KEY_carton, IPC_CREAT | 0666);
+                        int msg_id_carton = msgget(KEY_carton, 0666);
                         if(msg_id_carton == -1)
                             printf("\nError en cola para recibir carton\n");
                         //Se recibe el mensaje.
