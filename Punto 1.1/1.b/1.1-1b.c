@@ -9,12 +9,12 @@
 
 #define	ERROR_FORK 3
 
-#define KEY_clasificador 	((key_t) (1230))
+#define KEY_clasificador 	((key_t) (1230777))
 
-#define KEY_vidrio 			((key_t) (1231))
-#define KEY_aluminio	 	((key_t) (1232))
-#define KEY_plastico 		((key_t) (1233))
-#define KEY_carton	 		((key_t) (1234))
+#define KEY_vidrio 			((key_t) (123177))
+#define KEY_aluminio	 	((key_t) (123277))
+#define KEY_plastico 		((key_t) (123377))
+#define KEY_carton	 		((key_t) (123477))
 
 #define SEGSIZE sizeof(struct message_buffer) /* longitud del segmento */
 
@@ -29,14 +29,16 @@ void writer(int msg_id, char message){
     m.msg_type= 1;
     m.msg = message;
     if(msgsnd(msg_id, &m, ( sizeof(struct message_buffer) - sizeof(long) ), 0) == -1)
-        printf("Error al enviar mensaje.");
+        printf("\nError al enviar mensaje.\n");
+    printf("\nEstoy en writer meti %c\n", m.msg);
 }
 
 //Recibe el id de una cola de mensajes, lee el mensaje que esta adentro y lo devuelve.
 char reader(int msg_id){
     struct message_buffer m;
-    if(msgrcv(msg_id, &m, ( sizeof(struct message_buffer) - sizeof(long) ), 0) == -1)
-        printf("Error al recibir mensaje");
+    if(msgrcv(msg_id, &m, (sizeof(struct message_buffer) - sizeof(long)), 0, 0) == -1)
+        printf("\nError al recibir mensaje\n");
+    printf("\nEstoy en reader recibi %c\n", (m.msg));
     return (m.msg);
 }
 
@@ -65,15 +67,15 @@ int main(){
   */
 
 	pid_t pid;
-	
+
 	// Creación de las colas
-	int qid_clas = msgget(KEY_clasificador, SEGSIZE, IPC_CREAT|0666);
-	
-	int qid_vidrio = msgget(KEY_vidrio, SEGSIZE, IPC_CREAT|0666);
-	int qid_aluminio = msgget(KEY_aluminio, SEGSIZE, IPC_CREAT|0666);
-	int qid_carton = msgget(KEY_carton, SEGSIZE, IPC_CREAT|0666);
-	int qid_plastico = msgget(KEY_plastico, SEGSIZE, IPC_CREAT|0666);
-	
+	int qid_clas = msgget(KEY_clasificador, IPC_CREAT|0666);
+
+	int qid_vidrio = msgget(KEY_vidrio, IPC_CREAT|0666);
+	int qid_aluminio = msgget(KEY_aluminio, IPC_CREAT|0666);
+	int qid_carton = msgget(KEY_carton,  IPC_CREAT|0666);
+	int qid_plastico = msgget(KEY_plastico, IPC_CREAT|0666);
+
   // Código de los recolectores
 	for(int i = 0; i < 3; i++){
 		pid = fork();
@@ -86,9 +88,10 @@ int main(){
 			printf("\nRecolectar %i mete: %c\n", i, basura);
 
 			//Creacion de cola de mensajes de recolectores.
-			int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
+			//int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
+			int msg_id = msgget(KEY_clasificador, IPC_CREAT | 0666);
             if(msg_id == -1)
-                printf("Error en creacion de cola");
+                printf("\nError en creacion de cola de recolectores\n");
             //Se envia el mensaje,
             writer(msg_id, basura);
 
@@ -105,9 +108,10 @@ int main(){
 			while(1){
                 //Se obtiene la cola de mensajes de los recolectores.
 				char basura;
-                int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
+                //int msg_id = shmget(KEY_clasificador, SEGSIZE, 0);
+                int msg_id = msgget(KEY_clasificador, IPC_CREAT | 0666);
                 if(msg_id == -1)
-                    printf("Error en cola");
+                    printf("\nError en cola para recibir de recolectores\n");
 
                 //Se recibe el mensaje.
                 basura = reader(msg_id);
@@ -115,24 +119,29 @@ int main(){
 				printf("\n[Contador %i] Clasificador recibe %c\n", i, basura);
 
                 //Cola de mensajes para vidrio
-				int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
+				//int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
+				int msg_id_vidrio = msgget(KEY_vidrio, IPC_CREAT | 0666);
                 if(msg_id_vidrio == -1)
-                    printf("Error en cola");
+                    printf("\nError en cola de vidrio\n");
 
                 //Cola de mensajes para plastico
-                int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
+                //int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
+                int msg_id_plastico = msgget(KEY_plastico,IPC_CREAT | 0666 );
+
                 if(msg_id_plastico == -1)
-                    printf("Error en cola");
+                    printf("\nError en cola de plastico\n");
 
                 //Cola de mensajes para aluminio
-                int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
+                //int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
+                int msg_id_aluminio = msgget(KEY_aluminio, IPC_CREAT | 0666 );
                 if(msg_id_aluminio == -1)
-                    printf("Error en cola");
+                    printf("\nError en cola de aluminio\n");
 
                 //Cola de mensajes para carton
-                int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
+                //int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
+                int msg_id_carton = msgget(KEY_carton, IPC_CREAT | 0666);
                 if(msg_id_carton == -1)
-                    printf("Error en cola");
+                    printf("\nError en cola de carton\n");
 
                 //Envia en la cola de mensajes correspondiente.
 				switch(basura){
@@ -166,9 +175,10 @@ int main(){
 				switch(j){
 					case 0: {
                         //Se obtiene la cola de mensajes para vidrio.
-                        int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
+                        //int msg_id_vidrio = shmget(KEY_vidrio, SEGSIZE, 0);
+                        int msg_id_vidrio = msgget(KEY_vidrio, IPC_CREAT | 0666);
                         if(msg_id_vidrio == -1)
-                            printf("Error en cola");
+                            printf("\nError en cola para recibir vidrio\n");
                         //Se recibe el mensaje.
 						if(reader(msg_id_vidrio) == 'V') {
 							if(reciclarOtro == 0)
@@ -179,9 +189,10 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 1: {
                         //Se obtiene la cola de mensajes para plastico.
-                        int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
+                        //int msg_id_plastico = shmget(KEY_plastico, SEGSIZE, 0);
+                        int msg_id_plastico = msgget(KEY_plastico,IPC_CREAT | 0666 );
                         if(msg_id_plastico == -1)
-                            printf("Error en cola");
+                            printf("\nError en cola para recibir plastico\n");
                         //Se recibe el mensaje.
 						if(reader(msg_id_plastico) == 'P') {
 							if(reciclarOtro == 0)
@@ -192,9 +203,10 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 2: {
                         //Se obtiene la cola de mensajes para aluminio.
-                        int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
+                        //int msg_id_aluminio = shmget(KEY_aluminio, SEGSIZE, 0);
+                        int msg_id_aluminio = msgget(KEY_aluminio, IPC_CREAT | 0666 );
                         if(msg_id_aluminio == -1)
-                                printf("Error en cola");
+                                printf("\nError en cola para recibir aluminio\n");
                         //Se recibe el mensaje.
 						if(reader(msg_id_aluminio) == 'A') {
 							if(reciclarOtro == 0)
@@ -205,9 +217,10 @@ int main(){
 						} else reciclarOtro = 1;  break; }
 					case 3: {
                         //Se obtiene la cola de mensajes para carton.
-                        int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
+                        //int msg_id_carton = shmget(KEY_carton, SEGSIZE, 0);
+                        int msg_id_carton = msgget(KEY_carton, IPC_CREAT | 0666);
                         if(msg_id_carton == -1)
-                            printf("Error en cola");
+                            printf("\nError en cola para recibir carton\n");
                         //Se recibe el mensaje.
 						if(reader(msg_id_carton) == 'C') {
 							if(reciclarOtro == 0)
@@ -234,7 +247,11 @@ int main(){
 		} else continue;
 	}
 
+    msgctl(qid_clas, IPC_RMID, 0);
+    msgctl(qid_aluminio, IPC_RMID, 0);
+    msgctl(qid_carton, IPC_RMID, 0);
+    msgctl(qid_plastico, IPC_RMID, 0);
+    msgctl(qid_vidrio, IPC_RMID, 0);
 
 	return 0;
 }
-
