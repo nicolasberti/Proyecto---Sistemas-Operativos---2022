@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#define CANTIDAD_AUTOS 20
+#define CANTIDAD_AUTOS 6
 
 sem_t puenteDisponible, autosNorte, autosSur, mutexNorte, mutexSur; 
 
@@ -15,37 +15,40 @@ void *autoNorte(void *data){
 	if( sem_trywait(&autosNorte) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
 		printf("autoNorte %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosNorte); // Indico que estoy pasando el puente
-		sem_post(&mutexNorte);
+		sem_post(&autosNorte); // Agrego al que saqué
+    sem_post(&mutexNorte);
 		
     printf("autoNorte %i: pasando el puente...\n", *id);
 		sleep(5);
 		printf("autoNorte %i: pase el puente\n", *id);
     
 		sem_wait(&mutexNorte);
-		if( sem_trywait(&autosNorte) != -1 ) {
-			sem_post(&puenteDisponible); // No hay nadie sobre el puente, puedo liberar.
+		sem_wait(&autosNorte); // me bajo del puente
+		if( sem_trywait(&autosNorte) == -1 ) {
+			sem_post(&puenteDisponible); // No hay nadie sobre el puente (i.e era el último), puedo liberar.
 			printf("autoNorte %i: nadie me siguio\n", *id);
-		} else printf("autoNorte %i: me siguieron\n", *id);
+		} else { sem_post(&autosNorte); printf("autoNorte %i: me siguieron\n", *id); }
 		sem_post(&mutexNorte);
     
 		pthread_exit(NULL);	
 	}
-	sem_post(&mutexNorte);
 	sem_wait(&puenteDisponible);	
-	printf("autoNorte %i: soy el primero en pasar\n", *id);
+  printf("autoNorte %i: soy el primero en pasar\n", *id);
 	sem_post(&autosNorte);
- 
+  sem_post(&mutexNorte);
+  
   printf("autoNorte %i: pasando el puente...\n", *id);
   sleep(5);
   printf("autoNorte %i: pase el puente\n", *id);
     
-  sem_wait(&mutexNorte);
-  if( sem_trywait(&autosNorte) != -1 ) {
-      sem_post(&puenteDisponible);
-      printf("autoNorte %i: nadie me siguio\n", *id);
-  } else printf("autoNorte %i: me siguieron\n", *id);
-	sem_post(&mutexNorte);
-  
+  	sem_wait(&mutexNorte);
+		sem_wait(&autosNorte); // me bajo del puente
+		if( sem_trywait(&autosNorte) == -1 ) {
+			sem_post(&puenteDisponible); // No hay nadie sobre el puente (i.e era el último), puedo liberar.
+			printf("autoNorte %i: nadie me siguio\n", *id);
+		} else { sem_post(&autosNorte); printf("autoNorte %i: me siguieron\n", *id); }
+		sem_post(&mutexNorte);
+    
 	pthread_exit(NULL);
 }
 
@@ -55,37 +58,40 @@ void *autoSur(void *data){
 	if( sem_trywait(&autosSur) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
 		printf("autoSur %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosSur); // Indico que estoy pasando el puente
-		sem_post(&mutexSur);
+		sem_post(&autosSur); // Agrego al que saqué
+    sem_post(&mutexSur);
 		
     printf("autoSur %i: pasando el puente...\n", *id);
 		sleep(5);
 		printf("autoSur %i: pase el puente\n", *id);
     
 		sem_wait(&mutexSur);
-		if( sem_trywait(&autosSur) != -1 ) {
-			sem_post(&puenteDisponible); // No hay nadie sobre el puente, puedo liberar.
+  sem_wait(&autosSur); // me bajo del puente
+	if( sem_trywait(&autosSur) == -1 ) {
+			sem_post(&puenteDisponible); // No hay nadie sobre el puente (i.e era el último), puedo liberar.
 			printf("autoSur %i: nadie me siguio\n", *id);
-		} else printf("autoSur %i: me siguieron\n", *id);
-		sem_post(&mutexSur);
+	} else { sem_post(&autosSur); printf("autoSur %i: me siguieron\n", *id); }
+	sem_post(&mutexSur);
     
 		pthread_exit(NULL);	
 	}
-	sem_post(&mutexSur);
 	sem_wait(&puenteDisponible);	
-	printf("autoSur %i: soy el primero en pasar\n", *id);
+  printf("autoSur %i: soy el primero en pasar\n", *id);
 	sem_post(&autosSur);
- 
+  sem_post(&mutexSur);
+  
   printf("autoSur %i: pasando el puente...\n", *id);
   sleep(5);
   printf("autoSur %i: pase el puente\n", *id);
     
   sem_wait(&mutexSur);
-  if( sem_trywait(&autosSur) != -1 ) {
-      sem_post(&puenteDisponible);
-      printf("autoSur %i: nadie me siguio\n", *id);
-  } else printf("autoSur %i: me siguieron\n", *id);
+  sem_wait(&autosSur); // me bajo del puente
+	if( sem_trywait(&autosSur) == -1 ) {
+			sem_post(&puenteDisponible); // No hay nadie sobre el puente (i.e era el último), puedo liberar.
+			printf("autoSur %i: nadie me siguio\n", *id);
+	} else { sem_post(&autosSur); printf("autoSur %i: me siguieron\n", *id); }
 	sem_post(&mutexSur);
-  
+    
 	pthread_exit(NULL);
 }
 
