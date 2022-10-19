@@ -7,16 +7,19 @@
 
 #define CANTIDAD_AUTOS 6
 
-sem_t puenteDisponible, autosNorte, autosSur, mutexNorte, mutexSur; 
+sem_t puenteDisponible, autosNorte, autosSur;//, mutexNorte, mutexSur; 
+pthread_mutex_t  mutexNorte, mutexSur;
 
 void *autoNorte(void *data){
 	int *id= (int *)data;
-	sem_wait(&mutexNorte); // Exclusión mutua para fijarse si hay alguien pasando
+	//sem_wait(&mutexNorte); // Exclusión mutua para fijarse si hay alguien pasando
+	pthread_mutex_lock(&mutexNorte);	
 	if( sem_trywait(&autosNorte) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
 		printf("autoNorte %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosNorte); // Indico que estoy pasando el puente
 		sem_post(&autosNorte); // Agrego al que saqué
-    sem_post(&mutexNorte);
+  	pthread_mutex_unlock(&mutexNorte);  
+//sem_post(&mutexNorte);
 		
     printf("autoNorte %i: pasando el puente...\n", *id);
 		sleep(5);
@@ -35,7 +38,8 @@ void *autoNorte(void *data){
 	sem_wait(&puenteDisponible);	
   printf("autoNorte %i: soy el primero en pasar\n", *id);
 	sem_post(&autosNorte);
-  sem_post(&mutexNorte);
+ 	pthread_mutex_unlock(&mutexNorte);
+	// sem_post(&mutexNorte);
   
   printf("autoNorte %i: pasando el puente...\n", *id);
   sleep(5);
@@ -54,12 +58,14 @@ void *autoNorte(void *data){
 
 void *autoSur(void *data){
 	int *id= (int *)data;
-	sem_wait(&mutexSur); // Exclusión mutua para fijarse si hay alguien pasando
-	if( sem_trywait(&autosSur) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
+	//sem_wait(&mutexSur); // Exclusión mutua para fijarse si hay alguien pasando
+	pthread_mutex_lock(&mutexSur);	
+if( sem_trywait(&autosSur) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
 		printf("autoSur %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosSur); // Indico que estoy pasando el puente
 		sem_post(&autosSur); // Agrego al que saqué
-    sem_post(&mutexSur);
+	pthread_mutex_unlock(&mutexSur);	
+//    sem_post(&mutexSur);
 		
     printf("autoSur %i: pasando el puente...\n", *id);
 		sleep(5);
@@ -78,7 +84,8 @@ void *autoSur(void *data){
 	sem_wait(&puenteDisponible);	
   printf("autoSur %i: soy el primero en pasar\n", *id);
 	sem_post(&autosSur);
-  sem_post(&mutexSur);
+ 	pthread_mutex_unlock(&mutexSur);
+	// sem_post(&mutexSur);
   
   printf("autoSur %i: pasando el puente...\n", *id);
   sleep(5);
@@ -96,8 +103,10 @@ void *autoSur(void *data){
 }
 
 int main(){
-	sem_init(&mutexNorte, 0, 1);
-  sem_init(&mutexSur, 0, 1);
+	pthread_mutex_t  mutexNorte = PTHREAD_MUTEX_INITIALIZER;  
+	pthread_mutex_t  mutexSur = PTHREAD_MUTEX_INITIALIZER;  
+	//sem_init(&mutexNorte, 0, 1);
+  	//sem_init(&mutexSur, 0, 1);
 	sem_init(&puenteDisponible, 0, 1);
 	sem_init(&autosNorte, 0, 0);
 	sem_init(&autosSur, 0, 0);

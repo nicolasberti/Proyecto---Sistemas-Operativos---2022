@@ -94,7 +94,9 @@ int main(){
   // -- "Operario" que indica que autos deben pasar.
   while(1){
     struct vehiculo m;
-    msgrcv(qid_espera, &m, (sizeof(struct vehiculo) - sizeof(long)), 0, 0); // Lee el auto de la cola pasar. (1, MSG_EXCEPT para no leer la llave)
+    msgrcv(qid_espera, &m, (sizeof(struct vehiculo) - sizeof(long)), 0, 0); 
+    // Hacer un caso si llegase a leer la llave (pid==1) que continue el ciclo agregando la llave.
+    
     // hay que compilar con gcc -D_GNU_SOURCE [el resto de los parametros]
     printf("Vehiculo leido: [%i - %i]\n", m.sentido, m.pid);
     if(sentidoActual == 0){
