@@ -1,2 +1,0 @@
-- Falta testear 2.I y 2.III
-- Testear por las dudas por otros 
