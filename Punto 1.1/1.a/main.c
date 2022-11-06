@@ -32,8 +32,8 @@ int main(){
    * V: Vidrio
    * A: Aluminio
   */
-	pid_t pid;
-	int pipe_recicladorTOclasificador[2];
+  pid_t pid;
+  int pipe_recicladorTOclasificador[2];
 
   int pipe_vidrio[2];
   int pipe_carton[2];
@@ -78,6 +78,7 @@ int main(){
 		} else continue;
 	}
 	
+  // Código de los clasificadores
   for(int i = 0; i < 2; i++){
     pid = fork();
 		if(pid < 0) exit(ERROR_FORK);
@@ -115,7 +116,7 @@ int main(){
 			proceso
   (Repito el proceso)
   */
-  
+  // Código de los recicladores
 	for(int i = 0; i < 4; i++){
 		pid = fork();
 		if(pid < 0) exit(ERROR_FORK);

@@ -1,3 +1,4 @@
+OK TESTEAR
 Cambios 
 1.1-1b
 main.c <- creacion de colas
@@ -5,12 +6,15 @@ recolector.c
 clasificador.c
 reciclador.c
 
-------- Shell
+------- Shell OK ANDA
 shell.c <- metodo principal
 Hacer cada comando en un archivo.c
 compilar todos
+
 
 -- Puente de una mano con semaforos e hilos (ver si tambien en las colas)
 -- Seccion de entrada
 cruza el puente
 -- Seccion de salida (es lo mismo)
+
+** Hay que explicar bien en el informe sobre el de colas de mensajes del puente

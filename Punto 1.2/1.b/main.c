@@ -10,7 +10,8 @@
 #include <sys/wait.h>
 
 // Secuencia: .. AB(DoE)AC(DoE)F .. ( Se repite -> while(1) )
-
+// OBS: Le pusimos a las variables "sem" pero claramente no son semaforos, son pipes.
+// Los dejamos así simplemente para que quede similar (pero con pipes) al 1.a del punto 1.2
 int main(){
     int semA[2], semB[2], semC[2], semDE[2], semF[2], semFA[2];
 
