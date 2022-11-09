@@ -15,8 +15,6 @@
 // Cola espera: contiene la llave (tipo=1) y los autos (tipo=getpid() del proceso auto + 2) que están esperando a cruzar el puente
 // Cola pasar: contiene los autos habilitados a cruzar el puente en un momento de tiempo (tipo=getpid() del auto +2)
 
-// en cola pasra se podria agregar el tipo 1 para mutex, y getpid()+1 los autos
-
 #define KEY_colaEspera 					((key_t) (1234))
 #define KEY_colaPasar 					((key_t) (1235))
 
@@ -104,22 +102,26 @@ int main(){
   while(1){
     struct vehiculo m;
     msgrcv(qid_espera, &m, (sizeof(struct vehiculo) - sizeof(long)), 0, 0); 
-    // Hacer un caso si llegase a leer la llave (pid==1) que continue el ciclo agregando la llave.
-    
-    printf("Vehiculo leido: [%i - %i]\n", m.sentido, m.pid);
-    if(sentidoActual == 0){
-    	sentidoActual = m.sentido;
-      printf("sentidoActual = %i\n", m.sentido);
+    // Si llegase a leer la llave (pid==1) continua el ciclo agregando la llave.
+    if(m.pid == 1) {
+        msgsnd(qid_espera, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
     }
-    if(m.sentido == sentidoActual){
-     	msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
-      printf("Ingreso a cola pasar [%i - %i]\n", m.sentido, m.pid);
-    } else {
-      struct vehiculo llave;
-      msgrcv(qid_espera, &llave, (sizeof(struct vehiculo) - sizeof(long)), 1, 0); // Lee la llave
-      sentidoActual = m.sentido;
-      msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
-    }
+    else {
+   	 printf("Vehiculo leido: [%i - %i]\n", m.sentido, m.pid);
+   	 if(sentidoActual == 0){
+  	  	sentidoActual = m.sentido;
+  	    printf("sentidoActual = %i\n", m.sentido);
+  	  }
+  	  if(m.sentido == sentidoActual){
+  	   	msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
+  	    printf("Ingreso a cola pasar [%i - %i]\n", m.sentido, m.pid);
+  	  } else {
+   	   struct vehiculo llave;
+    	  msgrcv(qid_espera, &llave, (sizeof(struct vehiculo) - sizeof(long)), 1, 0); // Lee la llave
+    	  sentidoActual = m.sentido;
+     	 msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
+   	 }
+   }
   }
   
   msgctl(qid_espera, IPC_RMID, 0);

@@ -36,7 +36,6 @@ int main(){
   	for(int i = 0; i < 9; i++)
 	    wait(NULL);
 
-    //msgctl(qid_cola, IPC_RMID, 0);
 
 	exit(0);
 }
