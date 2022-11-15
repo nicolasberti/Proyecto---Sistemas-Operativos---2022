@@ -39,25 +39,25 @@ int main(){
   int pipe_carton[2];
   int pipe_aluminio[2];
   int pipe_plastico[2];
-  
+
   if(pipe(pipe_recicladorTOclasificador) < 0) exit(ERROR_PIPE);
   if(pipe(pipe_vidrio) < 0) exit(ERROR_PIPE);
   if(pipe(pipe_carton) < 0) exit(ERROR_PIPE);
   if(pipe(pipe_aluminio) < 0) exit(ERROR_PIPE);
   if(pipe(pipe_plastico) < 0) exit(ERROR_PIPE);
-  
+
   // Estos pipes son no bloqueantes para tener la posibilidad de optar por ayudar o ir a tomar mate (desde el punto de vista del reciclador)
-  if (fcntl(pipe_vidrio[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
-  if (fcntl(pipe_carton[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
-  if (fcntl(pipe_aluminio[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
-  if (fcntl(pipe_plastico[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FNCTL);
-  
+  if (fcntl(pipe_vidrio[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FCNTL);
+  if (fcntl(pipe_carton[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FCNTL);
+  if (fcntl(pipe_aluminio[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FCNTL);
+  if (fcntl(pipe_plastico[0], F_SETFL, O_NONBLOCK) < 0) exit(ERROR_FCNTL);
+
   // Código de los recolectores
 	for(int i = 0; i < 3; i++){
 		pid = fork();
 		if(pid < 0) exit(ERROR_FORK);
 		else if(pid == 0) { // Código del reciclador
-		  srand( time(NULL)+(i*52*37*96)); // Semilla del rand, hago que sean distintas 
+		  srand( time(NULL)+(i*52*37*96)); // Semilla del rand, hago que sean distintas
 		  /* Cierro los pipes que no se usan */
 		  close(pipe_recicladorTOclasificador[0]);
 		  close(pipe_vidrio[0]);
@@ -77,7 +77,7 @@ int main(){
 		  exit(0);
 		} else continue;
 	}
-	
+
   // Código de los clasificadores
   for(int i = 0; i < 2; i++){
     pid = fork();
@@ -104,7 +104,7 @@ int main(){
 			exit(0);
 		} else continue;
 	}
-  
+
   /*
 	Algoritmo - pseudocódigo de los recicladores
 	Leo del pipe
@@ -131,7 +131,7 @@ int main(){
 			int nread;
 			int j = i;
 			int reciclarOtro = 0;
-			srand( time(NULL)+(i*123*54+123*5)); 
+			srand( time(NULL)+(i*123*54+123*5));
 			while(1){
 				char basura;
 				switch(j){
@@ -188,7 +188,7 @@ int main(){
 			exit(0);
 		} else continue;
 	}
-  
+
 	/* Fin */
 	exit(0);
 }

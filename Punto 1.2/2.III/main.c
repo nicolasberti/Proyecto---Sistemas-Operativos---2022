@@ -6,6 +6,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <string.h>
+#include <time.h>
 
 // El modelo (algoritmo general) de como funciona el código está explicado en el informe como se pidió.
 
