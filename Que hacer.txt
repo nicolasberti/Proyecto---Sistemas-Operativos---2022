@@ -1,3 +1,0 @@
-- Grabar .mp3 
-- Compilar todos los archivos que no lo estén y subirlos al repo
-- Testear a full

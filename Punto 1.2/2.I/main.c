@@ -5,10 +5,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-// Para simular un while(1) habria que poner un numero grande
-// o cambiar el for por un while(1).
-#define CANTIDAD_AUTOS 6
-
 sem_t puenteDisponible, autosNorte, autosSur;
 pthread_mutex_t  mutexNorte, mutexSur;
 
@@ -93,28 +89,25 @@ void *autoSur(void *data){
 int main(){
 	pthread_mutex_t  mutexNorte = PTHREAD_MUTEX_INITIALIZER;  
 	pthread_mutex_t  mutexSur = PTHREAD_MUTEX_INITIALIZER;  
-	//sem_init(&mutexNorte, 0, 1);
-  	//sem_init(&mutexSur, 0, 1);
 	sem_init(&puenteDisponible, 0, 1);
 	sem_init(&autosNorte, 0, 0);
 	sem_init(&autosSur, 0, 0);
 	
-	pthread_t hilos[CANTIDAD_AUTOS];
-  for(int i = 0; i < CANTIDAD_AUTOS; i++){
-  	int *numero;
-    numero = malloc(sizeof(int));
-    *numero = i;
-  	time_t t;
-    srand((unsigned) time(&t)); 
-    switch(rand() % 2){
-      case 0: { printf("PADRE: auto NORTE id %i generado\n\n", *numero); pthread_create(&hilos[i], NULL, autoNorte, (void *)(numero)); break; }
-      case 1: { printf("PADRE: auto SUR id %i generado\n\n", *numero); pthread_create(&hilos[i], NULL, autoSur, (void *)(numero)); break; }
-    }
-    sleep(2);
-  }
-	
-	for(int i = 0; i < CANTIDAD_AUTOS; i++)
-		pthread_join(hilos[i], NULL);
+    pthread_t hilo;
+	int i = 0;
+	while(1){
+		int *numero;
+		numero = malloc(sizeof(int));
+		*numero = i;
+		time_t t;
+		srand((unsigned) time(&t)); 
+		switch(rand() % 2){
+		case 0: { printf("PADRE: auto NORTE id %i generado\n\n", *numero); pthread_create(&hilo, NULL, autoNorte, (void *)(numero)); break; }
+		case 1: { printf("PADRE: auto SUR id %i generado\n\n", *numero); pthread_create(&hilo, NULL, autoSur, (void *)(numero)); break; }
+		}
+		i++;
+		sleep(1);
+  	}
 		
 	printf("\n--FIN--\n");
 	exit(0);

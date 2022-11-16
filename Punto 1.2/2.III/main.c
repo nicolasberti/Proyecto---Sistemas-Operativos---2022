@@ -10,8 +10,9 @@
 
 // El modelo (algoritmo general) de como funciona el código está explicado en el informe como se pidió.
 
-// ## MUY IMPORTANTE: Si se aborta el programa, las colas quedan guardadas.
+// IMPORTANTE: Si se aborta el programa, las colas quedan guardadas.
 // Hice otro script que se llama "clear" para ejecutarlo y borrarlo si se quiere ejecutar de nuevo esto.
+// Sin embargo, lo que hicimos es que previamente ya que se da esta situación, si hay una cola existente en memoria, se borre.
 
 // Cola espera: contiene la llave (tipo=1) y los autos (tipo=getpid() del proceso auto + 2) que están esperando a cruzar el puente
 // Cola pasar: contiene los autos habilitados a cruzar el puente en un momento de tiempo (tipo=getpid() del auto +2)
@@ -19,13 +20,12 @@
 #define KEY_colaEspera 					((key_t) (1234))
 #define KEY_colaPasar 					((key_t) (1235))
 
-#define CANTIDAD_AUTOS 6
-
 struct vehiculo{
     long pid;
     int sentido;
 };
 
+/* -- Código del vehículo -- */
 void autoEntidad(int sent, int i, int qid_espera, int qid_pasar){
 	
   char *sentido;
@@ -71,29 +71,52 @@ void autoEntidad(int sent, int i, int qid_espera, int qid_pasar){
     
   exit(0);
 }
+/* -- Fin código vehículo -- */
+
+/* -- Código generador de vehículos -- */
+void generadorAutos(int qid_espera, int qid_pasar){
+	// Creación de autos
+	pid_t pid;
+	int i = 0;
+	while(1){
+		pid = fork();
+		if(pid == 0){
+			srand(time(NULL) * i); 
+		  int random = rand() % 2;
+		  if(random == 0)
+			{ autoEntidad(1, i, qid_espera, qid_pasar); }
+		  else 
+			{ autoEntidad(2, i, qid_espera, qid_pasar); }
+		} 
+		else { i++; sleep(1); }
+	}
+}
+/* -- Fin código generador de vehículos -- */
+
 
 int main(){
   
-  // Creación de la cola.
-  int qid_espera = msgget(KEY_colaEspera, IPC_CREAT|0666);
-  int qid_pasar = msgget(KEY_colaPasar, IPC_CREAT|0666);
-  int sentidoActual = 0;
+  /* En caso de que anteriormente se haya abortado el programa (como nunca finaliza) se borran las colas si es que quedaron en memoria*/
+    int qid_espera = msgget(KEY_colaEspera, 0666);
+    int qid_pasar = msgget(KEY_colaPasar, 0666);
+	msgctl(qid_espera, IPC_RMID, 0);
+	msgctl(qid_pasar, IPC_RMID, 0);
+  /* ------------------------------------------------------------------------------------------------------------------------------- */
   
-  // Creación de autos
+  // Creación de las colas.
+  qid_espera = msgget(KEY_colaEspera, IPC_CREAT|0666);
+  qid_pasar = msgget(KEY_colaPasar, IPC_CREAT|0666);
+  int sentidoActual = 0; // Variable local que usa el intermediario para saber que sentido se encuentra.
+  
+  // El que genera los vehículos es un proceso aparte.
+ 
   pid_t pid;
-  for(int i = 0; i < CANTIDAD_AUTOS; i++){
-    pid = fork();
-    if(pid == 0){
-    	srand(time(NULL) * i); 
-      int random = rand() % 2;
-      if(random == 0)
-        { autoEntidad(1, i, qid_espera, qid_pasar); }
-      else 
-        { autoEntidad(2, i, qid_espera, qid_pasar); }
-    } else continue;
+  pid = fork();
+  if(pid == 0){
+	generadorAutos(qid_espera, qid_pasar);
   }
-  sleep(2);
-  printf("\n\n");
+  
+  sleep(1);
   
   struct vehiculo mutex;
   mutex.pid = 1;
@@ -111,7 +134,11 @@ int main(){
    	 printf("Vehiculo leido: [%i - %i]\n", m.sentido, m.pid);
    	 if(sentidoActual == 0){
   	  	sentidoActual = m.sentido;
-  	    printf("sentidoActual = %i\n", m.sentido);
+        printf("Comienza con sentido: ");
+        if(sentidoActual == 1)
+            printf("Norte\n");
+        else 
+            printf("Sur\n");
   	  }
   	  if(m.sentido == sentidoActual){
   	   	msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
@@ -119,7 +146,12 @@ int main(){
   	  } else {
    	   struct vehiculo llave;
     	  msgrcv(qid_espera, &llave, (sizeof(struct vehiculo) - sizeof(long)), 1, 0); // Lee la llave
-    	  sentidoActual = m.sentido;
+          sentidoActual = m.sentido;
+          printf("Se cambio el sentido a: ");
+          if(sentidoActual == 1)
+            printf("Norte\n");
+          else 
+            printf("Sur\n");
      	 msgsnd(qid_pasar, &m, (sizeof(struct vehiculo) - sizeof(long)), 0);
    	 }
    }
