@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define ERROR_PIPE 1
 #define	ERROR_FCNTL 2

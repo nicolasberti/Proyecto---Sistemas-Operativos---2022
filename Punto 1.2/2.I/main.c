@@ -10,28 +10,28 @@ pthread_mutex_t  mutexNorte, mutexSur;
 
 void *autoNorte(void *data){
 	int *id= (int *)data;
-	/* Sección de entrada 
+	/* Sección de entrada
 		1. Puedo entrar si hay alguien de mi sentido en el puente.
 		2. Puedo entrar como primero, esto es, no hay nadie cruzando el puente.
-	*/ 
-	pthread_mutex_lock(&mutexNorte);	
+	*/
+	pthread_mutex_lock(&mutexNorte);
 	if( sem_trywait(&autosNorte) != -1 ) { // Un auto proveniente del norte está circulando sobre el puente.
 		printf("autoNorte %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosNorte); // Indico que estoy pasando el puente
 		sem_post(&autosNorte); // Agrego al que saqué
-	pthread_mutex_unlock(&mutexNorte);  
+	pthread_mutex_unlock(&mutexNorte);
 	} else { // Caso en el que soy el primero en pasar
-		sem_wait(&puenteDisponible);	
+		sem_wait(&puenteDisponible);
 		// No libero el mutex hasta que pase como "primero". Si no se puede dar el caso de que el auto de atras pase como primero y no me siga.
 		printf("autoNorte %i: soy el primero en pasar\n", *id);
 		sem_post(&autosNorte);
 		pthread_mutex_unlock(&mutexNorte);
 	}
-	
+
 	/* Cruzando el puente */
     printf("autoNorte %i: pasando el puente...\n", *id);
 	sleep(5);
-	
+
 	/* Sección de salida */
 	printf("autoNorte %i: pase el puente\n", *id);
 	/* Compruebo si hay alguien atrás mio (i.e soy el último?) */
@@ -42,34 +42,34 @@ void *autoNorte(void *data){
 			printf("autoNorte %i: nadie me siguio\n", *id);
 		} else { sem_post(&autosNorte); printf("autoNorte %i: me siguieron\n", *id); }
 	pthread_mutex_unlock(&mutexNorte);
-	
-	pthread_exit(NULL);	
+
+	pthread_exit(NULL);
 }
 
 void *autoSur(void *data){
 	int *id= (int *)data;
-	/* Sección de entrada 
+	/* Sección de entrada
 		1. Puedo entrar si hay alguien de mi sentido en el puente.
 		2. Puedo entrar como primero, esto es, no hay nadie cruzando el puente.
-	*/ 
-	pthread_mutex_lock(&mutexSur);	
+	*/
+	pthread_mutex_lock(&mutexSur);
 	if( sem_trywait(&autosSur) != -1 ) { // Un auto proveniente del sur está circulando sobre el puente.
 		printf("autoSur %i: hay alguien pasando, paso con el\n", *id);
 		sem_post(&autosSur); // Indico que estoy pasando el puente
 		sem_post(&autosSur); // Agrego al que saqué
-	pthread_mutex_unlock(&mutexSur);  
+	pthread_mutex_unlock(&mutexSur);
 	} else { // Caso en el que soy el primero en pasar
-		sem_wait(&puenteDisponible);	
+		sem_wait(&puenteDisponible);
 		// No libero el mutex hasta que pase como "primero". Si no se puede dar el caso de que el auto de atras pase como primero y no me siga.
 		printf("autoSur %i: soy el primero en pasar\n", *id);
 		sem_post(&autosSur);
 		pthread_mutex_unlock(&mutexSur);
 	}
-	
+
 	/* Cruzando el puente */
     printf("autoSur %i: pasando el puente...\n", *id);
 	sleep(5);
-	
+
 	/* Sección de salida */
 	printf("autoSur %i: pase el puente\n", *id);
 	/* Compruebo si hay alguien atrás mio (i.e soy el último?) */
@@ -80,19 +80,19 @@ void *autoSur(void *data){
 			printf("autoSur %i: nadie me siguio\n", *id);
 		} else { sem_post(&autosSur); printf("autoSur %i: me siguieron\n", *id); }
 	pthread_mutex_unlock(&mutexSur);
-	
-	pthread_exit(NULL);	
+
+	pthread_exit(NULL);
 }
 
 
 /* Función principal */
 int main(){
-	pthread_mutex_t  mutexNorte = PTHREAD_MUTEX_INITIALIZER;  
-	pthread_mutex_t  mutexSur = PTHREAD_MUTEX_INITIALIZER;  
+	pthread_mutex_t  mutexNorte = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t  mutexSur = PTHREAD_MUTEX_INITIALIZER;
 	sem_init(&puenteDisponible, 0, 1);
 	sem_init(&autosNorte, 0, 0);
 	sem_init(&autosSur, 0, 0);
-	
+
     pthread_t hilo;
 	int i = 0;
 	while(1){
@@ -100,7 +100,7 @@ int main(){
 		numero = malloc(sizeof(int));
 		*numero = i;
 		time_t t;
-		srand((unsigned) time(&t)); 
+		srand((unsigned) time(&t));
 		switch(rand() % 2){
 		case 0: { printf("PADRE: auto NORTE id %i generado\n\n", *numero); pthread_create(&hilo, NULL, autoNorte, (void *)(numero)); break; }
 		case 1: { printf("PADRE: auto SUR id %i generado\n\n", *numero); pthread_create(&hilo, NULL, autoSur, (void *)(numero)); break; }
@@ -108,7 +108,6 @@ int main(){
 		i++;
 		sleep(1);
   	}
-		
-	printf("\n--FIN--\n");
+
 	exit(0);
 }
